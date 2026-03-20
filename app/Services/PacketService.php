@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\PacketStatus;
 use App\Models\Packet;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class PacketService
 {
@@ -13,21 +14,32 @@ class PacketService
      */
     public function create(array $data): Packet
     {
-        return Packet::create([
+       $packet = Packet::create([
             ...$data,
             'status' => PacketStatus::Created,
         ]);
+
+         // Invalida el caché al crear un nuevo envío
+        Cache::forget('packets.all');
+        Cache::forget('packets.all.created');
+
+        return $packet->fresh();
     }
 
     /**
      * Retorna todos los envíos, con filtro opcional por estado
+     * La respuesta se cachea por 5 minutos
      */
-    public function getAll(?PacketStatus $status): Collection
+    public function getAll(?PacketStatus $status = null): Collection
     {
-        return Packet::when(
-            $status,
-            fn($query) => $query->where('status', $status->value)
-        )->get();
+        $cacheKey = 'packets.all' . ($status ? ".{$status->value}" : '');
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), fn() =>
+            Packet::when(
+                $status,
+                fn($query) => $query->where('status', $status->value)
+            )->get()
+        );
     }
 
     /**
@@ -47,8 +59,14 @@ class PacketService
             throw new InvalidStatusTransitionException($packet->status, $newStatus);
         }
 
+        $oldStatus = $packet->status;
         $packet->update(['status' => $newStatus]);
 
-        return $packet;
+        // Invalida el caché al cambiar el estado
+        Cache::forget('packets.all');
+        Cache::forget("packets.all.{$oldStatus->value}");
+        Cache::forget("packets.all.{$newStatus->value}");
+
+        return $packet->fresh();
     }
 }
