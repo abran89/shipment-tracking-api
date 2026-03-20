@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('packets', function (Blueprint $table) {
+            $table->id();
+            $table->string('tracking_code')->unique();
+            $table->string('recipient_name');
+            $table->string('recipient_email');
+            $table->string('destination_address');
+            $table->integer('weight_grams');
+            $table->enum('status', ['created','in_transit','delivered','failed'])->default('created');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('packets');
+    }
+};
