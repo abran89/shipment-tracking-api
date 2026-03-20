@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\PacketStatus;
 
 class Packet extends Model
 {
@@ -15,9 +16,19 @@ class Packet extends Model
         'status',
     ];
 
-    public const STATUS_CREATED   = 'created';
-    public const STATUS_IN_TRANSIT = 'in_transit';
-    public const STATUS_DELIVERED = 'delivered';
-    public const STATUS_FAILED    = 'failed';
+    /**
+    * Castea el campo status al enum PacketStatus automáticamente.
+    */
+    protected $casts = [
+        'status' => PacketStatus::class,
+    ];
+
+    /**
+     * Determina si el cambio a un nuevo estado es válido.
+     */
+    public function isValidTransition(PacketStatus $newStatus): bool
+    {
+        return $this->status->canTransitionTo($newStatus);
+    }
 
 }
