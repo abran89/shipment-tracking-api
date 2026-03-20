@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('recipient_email');
             $table->string('destination_address');
             $table->integer('weight_grams');
-            $table->enum('status', ['created','in_transit','delivered','failed'])->default('created');
+            $table->string('status')->default('created');
             $table->timestamps();
         });
     }
