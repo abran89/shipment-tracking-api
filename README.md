@@ -18,8 +18,9 @@ El proyecto usa SQLite por defecto. Las variables principales están en `.env`:
 
 - `APP_NAME`, `APP_ENV`, `APP_DEBUG`
 - `DB_CONNECTION=sqlite`
-- `LOG_LEVEL=debug`
-- `CACHE_STORE=file`
+- `LOG_LEVEL=warning`, `LOG_CHANNEL=single`
+- `QUEUE_CONNECTION=database`
+- `WEBHOOK_URL=` - URL para notificaciones de cambio de estado
 
 ## Tecnologías
 
@@ -55,6 +56,25 @@ Importar [`postman/shipment-tracking-api.postman_collection.json`](postman/shipm
 ```bash
 php artisan test
 ```
+
+## Queue Worker
+
+El job `SendStatusWebhook` se ejecuta de forma asíncrona cuando cambia el estado de un paquete. Configuración:
+
+```env
+QUEUE_CONNECTION=database
+```
+
+### Ejecutar el worker
+
+```bash
+php artisan queue:work database --once  # procesar un job
+php artisan queue:work database         # ejecutar continuamente
+```
+
+### Reintentos
+
+El job tiene configurado `$tries = 2` con backoff de 10 segundos. Si todos los intentos fallan, se registra en `failed_jobs`.
 
 ## Estructura
 
