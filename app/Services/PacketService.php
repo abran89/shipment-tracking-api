@@ -4,9 +4,10 @@ namespace App\Services;
 
 use App\Enums\PacketStatus;
 use App\Models\Packet;
+use App\Exceptions\PacketNotFoundException;
+use App\Exceptions\InvalidStatusTransitionException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
-use App\Exceptions\InvalidStatusTransitionException;
 
 class PacketService
 {
@@ -20,7 +21,6 @@ class PacketService
             'status' => PacketStatus::Created,
         ]);
 
-         // Invalida el caché al crear un nuevo envío
         Cache::forget('packets.all');
         Cache::forget('packets.all.created');
 
@@ -44,14 +44,6 @@ class PacketService
     }
 
     /**
-     * Retorna un envío por su ID
-     */
-    public function getById(int $id): Packet
-    {
-        return Packet::findOrFail($id);
-    }
-
-    /**
      * Actualiza el estado de un envío si la transición es válida
      */
     public function updateStatus(Packet $packet, PacketStatus $newStatus): Packet
@@ -63,7 +55,6 @@ class PacketService
         $oldStatus = $packet->status;
         $packet->update(['status' => $newStatus]);
 
-        // Invalida el caché al cambiar el estado
         Cache::forget('packets.all');
         Cache::forget("packets.all.{$oldStatus->value}");
         Cache::forget("packets.all.{$newStatus->value}");
