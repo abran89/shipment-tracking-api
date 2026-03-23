@@ -8,6 +8,7 @@ use App\Exceptions\PacketNotFoundException;
 use App\Exceptions\InvalidStatusTransitionException;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
+use App\Jobs\SendStatusWebhook;
 
 class PacketService
 {
@@ -57,6 +58,8 @@ class PacketService
         $packet->refresh();
 
         $this->flushCache($oldStatus, $newStatus);
+
+        SendStatusWebhook::dispatch($packet, $oldStatus, $newStatus);
 
         return $packet;
     }
