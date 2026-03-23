@@ -1,0 +1,145 @@
+{
+  "info": {
+    "_postman_id": "548725db-4b0a-47ae-8715-36c0084c483e",
+    "name": "shipment-tracking-api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40076606"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tracking_code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "recipient_name",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "recipient_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "destination_address",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "weight_grams",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "status",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "packet_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Crear envío",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"tracking_code\": \"{{tracking_code}}\",\r\n    \"recipient_name\": \"{{recipient_name}}\",\r\n    \"recipient_email\": \"{{recipient_email}}\",\r\n    \"destination_address\": \"{{destination_address}}\",\r\n    \"weight_grams\": \"{{weight_grams}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/packets",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "packets"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar envíos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/packets",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "packets"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Detalle de envío",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/packets/{{packet_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "packets",
+            "{{packet_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cambiar estado",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"status\": \"{{status}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/api/packets/{{packet_id}}/status",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "packets",
+            "{{packet_id}}",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
