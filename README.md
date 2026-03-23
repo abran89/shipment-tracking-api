@@ -1,12 +1,6 @@
 # Shipment Tracking API
 
-API REST para gestión de envíospaquetes con tracking.
-
-## Requisitos
-
-- PHP 8.2+
-- Composer
-- Laravel 12
+API en Laravel 12 para gestionar el seguimiento de paquetes.
 
 ## Instalación
 
@@ -18,120 +12,43 @@ php artisan migrate
 php artisan serve
 ```
 
-## Endpoints API
+## Configuración
 
-### POST /api/packets
-Crear un nuevo envío
+El proyecto usa SQLite por defecto. Las variables principales están en `.env`:
 
-**Request:**
-```json
-{
-    "tracking_code": "ABC-123",
-    "recipient_name": "Juan Pérez",
-    "recipient_email": "juan@example.com",
-    "destination_address": "Av. Siempre Viva 123",
-    "weight_grams": 500
-}
-```
+- `APP_NAME`, `APP_ENV`, `APP_DEBUG`
+- `DB_CONNECTION=sqlite`
+- `LOG_LEVEL=debug`
+- `CACHE_STORE=file`
 
-**Respuesta (201):**
-```json
-{
-    "data": {
-        "id": 1,
-        "tracking_code": "ABC-123",
-        "recipient_name": "Juan Pérez",
-        "recipient_email": "juan@example.com",
-        "destination_address": "Av. Siempre Viva 123",
-        "weight_grams": 500,
-        "status": "created"
-    }
-}
-```
+## Tecnologías
 
----
+- Laravel 12
+- PHP 8.2+
+- SQLite
+- Pest (tests)
 
-### GET /api/packets
-Listar todos los envíos (con paginación)
+## Arquitectura
 
-**Query Parameters:**
-- `status` (optional) - Filtrar por estado: `created`, `in_transit`, `delivered`, `failed`
+- **Service Layer**: [`PacketService.php`](app/Services/PacketService.php) maneja la lógica de negocio
+- **Form Requests**: Validaciones en [`app/Http/Requests/`](app/Http/Requests/)
+- **API Resources**: Respuestas transformadas en [`PacketResource.php`](app/Http/Resources/PacketResource.php)
+- **Estados**: Enum [`PacketStatus.php`](app/Enums/PacketStatus.php) con transiciones controladas
 
-**Respuesta (200):**
-```json
-{
-    "data": [
-        {
-            "id": 1,
-            "tracking_code": "ABC-123",
-            "status": "created"
-        }
-    ]
-}
-```
+## Endpoints
 
----
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/api/packets` | Crear envío |
+| GET | `/api/packets` | Listar envíos (filtro por `?status=`) |
+| GET | `/api/packets/{id}` | Ver detalle |
+| PUT | `/api/packets/{id}/status` | Cambiar estado |
 
-### GET /api/packets/{id}
-Ver detalle de un envío específico
-
-**Respuesta (200):**
-```json
-{
-    "data": {
-        "id": 1,
-        "tracking_code": "ABC-123",
-        "recipient_name": "Juan Pérez",
-        "recipient_email": "juan@example.com",
-        "destination_address": "Av. Siempre Viva 123",
-        "weight_grams": 500,
-        "status": "created"
-    }
-}
-```
-
----
-
-### PUT /api/packets/{id}/status
-Actualizar el estado de un envío
-
-**Request:**
-```json
-{
-    "status": "in_transit"
-}
-```
-
-**Transiciones válidas:**
-- `created` → `in_transit`
-- `in_transit` → `delivered`
-- `in_transit` → `failed`
-
-**Respuesta (200):**
-```json
-{
-    "data": {
-        "id": 1,
-        "tracking_code": "ABC-123",
-        "status": "in_transit"
-    }
-}
-```
-
-**Respuesta error (422) - Transición inválida:**
-```json
-{
-    "message": "Transición inválida de created a delivered."
-}
-```
-
----
+Estados: `created` → `in_transit` → `delivered` o `failed`
 
 ## Probar con Postman
 
-1. Importar colección desde `postman/Shipment API.postman_collection.json`
-2. Ejecutar `php artisan serve`
-3. URL base: `http://127.0.0.1:8000`
+Importar [`postman/shipment-tracking-api.postman_collection.json`](postman/shipment-tracking-api.postman_collection.json) y configurar la variable `base_url`.
 
 ## Tests
 
@@ -139,6 +56,15 @@ Actualizar el estado de un envío
 php artisan test
 ```
 
-### Pruebas disponibles:
-- **Unitarias:** [`tests/Unit/PacketStatusTest.php`](tests/Unit/PacketStatusTest.php) - Lógica de transiciones de estado
-- **Feature:** [`tests/Feature/PacketControllerTest.php`](tests/Feature/PacketControllerTest.php) - Endpoints de la API
+## Estructura
+
+```
+app/
+├── Enums/PacketStatus.php
+├── Exceptions/InvalidStatusTransitionException.php
+├── Http/Controllers/PacketController.php
+├── Http/Middleware/ForceJsonAccept.php
+├── Http/Requests/
+├── Http/Resources/PacketResource.php
+├── Models/Packet.php
+└── Services/PacketService.php
