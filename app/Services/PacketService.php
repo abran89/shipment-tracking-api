@@ -11,20 +11,20 @@ use Illuminate\Support\Facades\Cache;
 
 class PacketService
 {
+    private const CACHE_TTL_MINUTES = 5;
     /**
      * Crea un nuevo envío con estado inicial created
      */
     public function create(array $data): Packet
     {
-       $packet = Packet::create([
+        $packet = Packet::create([
             ...$data,
             'status' => PacketStatus::Created,
         ]);
 
-        Cache::forget('packets.all');
-        Cache::forget('packets.all.created');
+        $this->flushCache(PacketStatus::Created);
 
-        return $packet->fresh();
+        return $packet;
     }
 
     /**
@@ -35,11 +35,10 @@ class PacketService
     {
         $cacheKey = 'packets.all' . ($status ? ".{$status->value}" : '');
 
-        return Cache::remember($cacheKey, now()->addMinutes(5), fn() =>
-            Packet::when(
-                $status,
-                fn($query) => $query->where('status', $status->value)
-            )->get()
+        return Cache::remember(
+            $cacheKey,
+            now()->addMinutes(self::CACHE_TTL_MINUTES),
+            fn () => Packet::when($status, fn ($q) => $q->where('status', $status->value))->get()
         );
     }
 
@@ -53,12 +52,24 @@ class PacketService
         }
 
         $oldStatus = $packet->status;
+
         $packet->update(['status' => $newStatus]);
+        $packet->refresh();
 
+        $this->flushCache($oldStatus, $newStatus);
+
+        return $packet;
+    }
+
+     /**
+     * Invalida el cache general y el de cada estado afectado.
+     */
+    private function flushCache(PacketStatus ...$statuses): void
+    {
         Cache::forget('packets.all');
-        Cache::forget("packets.all.{$oldStatus->value}");
-        Cache::forget("packets.all.{$newStatus->value}");
 
-        return $packet->fresh();
+        foreach ($statuses as $status) {
+            Cache::forget("packets.all.{$status->value}");
+        }
     }
 }
