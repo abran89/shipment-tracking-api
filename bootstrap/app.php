@@ -4,6 +4,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\ForceJsonAccept;
+use App\Exceptions\PacketNotFoundException;
+use App\Exceptions\InvalidStatusTransitionException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ForceJsonAccept::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
+    ->withExceptions(function ($exceptions) {
+        $exceptions->render(function (InvalidStatusTransitionException $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        });
     })->create();
