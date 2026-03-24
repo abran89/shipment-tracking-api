@@ -17,14 +17,10 @@ class CarrierWebhookController extends Controller
     public function __invoke(CarrierWebhookRequest $request): JsonResponse
     {
         if (!$request->isValidSignature()) {
-            return response()->json(['message' => 'Firma inválida.'], 401);
+            throw new InvalidSignatureException();
         }
 
-        $packet = Packet::where('tracking_code', $request->input('tracking_code'))->first();
-
-        if (!$packet) {
-            return response()->json(['message' => 'Envío no encontrado.'], 404);
-        }
+        $packet = Packet::where('tracking_code', $request->input('tracking_code'))->firstOrFail();
 
         $this->packetService->updateStatus($packet, PacketStatus::Delivered);
 

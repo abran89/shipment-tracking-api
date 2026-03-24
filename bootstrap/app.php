@@ -25,4 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 'message' => $e->getMessage()
             ], 422);
         });
+
+        $exceptions->render(function (InvalidSignatureException $e) {
+            return response()->json(['message' => $e->getMessage()], 
+            401);
+        });
     })->create();
