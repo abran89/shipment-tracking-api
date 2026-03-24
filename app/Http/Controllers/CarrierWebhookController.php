@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\Packet;
+use App\Http\Requests\CarrierWebhookRequest;
+use App\Exceptions\InvalidSignatureException;
 use App\Enums\PacketStatus;
 use App\Services\PacketService;
+
 
 class CarrierWebhookController extends Controller
 {
@@ -27,3 +30,4 @@ class CarrierWebhookController extends Controller
         return response()->json(['message' => 'Estado actualizado correctamente.']);
     }
 }
+

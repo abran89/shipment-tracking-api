@@ -2,12 +2,12 @@
 
 namespace App\Exceptions;
 
-use Exception;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
-class InvalidSignatureException extends Exception
+class InvalidSignatureException extends HttpException
 {
     public function __construct()
     {
-        parent::__construct('Firma inválida.');
+        parent::__construct(401, 'Firma inválida.');
     }
 }
