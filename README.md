@@ -56,6 +56,15 @@ Al crear o actualizar un envío, se invalida el caché general y el de los estad
 - **Transiciones de estado**: Solo se permiten transiciones válidas (created → in_transit → delivered/failed)
 - **Códigos de seguimiento**: Únicos por envío
 
+### Variables de Entorno en Producción
+
+En entorno de **producción**, las siguientes variables son obligatorias y se validan en [`AppServiceProvider.php`](app/Providers/AppServiceProvider.php):
+
+- `CARRIER_WEBHOOK_SECRET` - Secret para validar la firma del webhook del transportista
+- `WEBHOOK_URL` - URL donde se enviarán las notificaciones de cambio de estado
+
+Si alguna no está configurada, la aplicación no arrancará en producción.
+
 ## Endpoints
 
 | Método | Ruta | Descripción |
