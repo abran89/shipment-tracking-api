@@ -38,8 +38,7 @@ class SendStatusWebhook implements ShouldQueue
         $webhookUrl = config('services.webhook_url');
 
         if (!$webhookUrl) {
-            Log::warning('WEBHOOK_URL no definida, se omite notificación.');
-            return;
+            throw new \Exception('WEBHOOK_URL no configurada. No se puede enviar el webhook.');
         }
 
         try {

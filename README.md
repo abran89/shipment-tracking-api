@@ -5,8 +5,11 @@ API en Laravel 12 para gestionar el seguimiento de paquetes.
 ## Instalación
 
 ```bash
+git clone https://github.com/abran89/shipment-tracking-api.git
+cd shipment-tracking-api
 composer install
-cp .env.example .env
+cp .env.example .env        # Linux / macOS
+copy .env.example .env      # Windows
 php artisan key:generate
 php artisan migrate
 php artisan serve
